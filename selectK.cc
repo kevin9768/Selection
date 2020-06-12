@@ -1,38 +1,48 @@
 #include <fstream>
 #include <vector>
 #include <cmath>
+#include <iomanip>
 #include <iostream>
 
 using namespace std;
 int n, k;
-int prunes(vector<int> arr, int _k){
+
+void q_sort(vector<int>& arr, int l, int r);
+
+int prunes(vector<int>& arr, int _k){
     //Step 1
-    if(arr.size()<5){
-        sort(arr.begin(), arr.end());
+    if(arr.size()<=5){
+        q_sort(arr, 0, arr.size() - 1);
         return arr[_k-1];
     }
 
     //Step 2
-    int n_sub = ceil(arr.size()/5.0);
-    vector<vector<int> > sub(n_sub, vector<int>());
-
-    int idx=0;
-    for(int i=0; i<arr.size(); i++){
-        sub.at(idx).push_back(arr[i]);
-        if(i%5==4)
-            idx++;
+    vector<vector<int> > sub;
+    if(arr.size()==5){
+        sub.push_back(arr);
     }
-    if(idx<n_sub)
-        for(int i=sub[idx].size(); i<5; i++)
-            sub[idx][i] = INT32_MAX;
+    else{
+        int n_sub = ceil(arr.size()/5.0);
+        sub.resize(n_sub, vector<int>());
+
+        int idx=0;
+        for(int i=0; i<arr.size(); i++){
+            sub.at(idx).push_back(arr[i]);
+            if(i%5==4)
+                idx++;
+        }
+        if(idx<n_sub)
+            for(int i=sub[idx].size(); i<5; i++)
+                sub[idx].push_back(INT32_MAX);
+    }
 
     //Step 3
     for(auto &i: sub)
-        sort(i.begin(), i.end());
+        q_sort(i, 0, i.size()-1);
     
     //Step 4
     vector<int> medians_sub;
-    for(auto &i: sub){
+    for(auto i: sub){
         int m = prunes(i, 3);
         medians_sub.push_back(m);
     }
@@ -46,7 +56,7 @@ int prunes(vector<int> arr, int _k){
         else if(i==p)
             s2.push_back(i);
         else
-            s3.push_back(3);
+            s3.push_back(i);
     }
 
     //Step 6
@@ -115,7 +125,7 @@ int main(int argc, char** argv){
     else if(argc==4){
         input.open(argv[1]);
         QS.open(argv[2]);
-        //PS.open(argv[3]);
+        PS.open(argv[3]);
     }
 
     input>>n>>k;
